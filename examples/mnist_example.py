@@ -1,4 +1,8 @@
 
+import sys
+import os
+sys.path.append(os.path.expanduser('~/DeepLearning/torchsample'))
+
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,10 +16,10 @@ from torchsample.metrics import CategoricalAccuracy
 
 import os
 from torchvision import datasets
-ROOT = '/users/ncullen/desktop/data/mnist'
+ROOT = './data/'
 dataset = datasets.MNIST(ROOT, train=True, download=True)
-x_train, y_train = th.load(os.path.join(dataset.root, 'processed/training.pt'))
-x_test, y_test = th.load(os.path.join(dataset.root, 'processed/test.pt'))
+x_train, y_train = th.load(os.path.join(dataset.root, 'mnist/processed/training.pt'))
+x_test, y_test = th.load(os.path.join(dataset.root, 'mnist/processed/test.pt'))
 
 x_train = x_train.float()
 y_train = y_train.long()
@@ -72,8 +76,8 @@ trainer.compile(loss='nll_loss',
                 initializers=initializers,
                 metrics=metrics)
 
-#summary = trainer.summary([1,28,28])
-#print(summary)
+# summary = trainer.summary([1,28,28])
+# print(summary)
 
 trainer.fit(x_train, y_train, 
           val_data=(x_test, y_test),
