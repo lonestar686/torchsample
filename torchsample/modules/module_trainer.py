@@ -390,7 +390,7 @@ class ModuleTrainer(object):
                     self._in_train_loop = False
                     #self.history.batch_metrics.update(val_epoch_logs)
                     epoch_logs.update(val_epoch_logs)
-                    epoch_logs.update(batch_logs)
+                    # epoch_logs.update(batch_logs)
                     # TODO how to fix this?
                     # self.history.batch_metrics.update(val_epoch_logs)
 
