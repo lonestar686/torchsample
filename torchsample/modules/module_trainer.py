@@ -291,7 +291,8 @@ class ModuleTrainer(object):
                     # TODO how to fix this?
                     # self.history.batch_metrics.update(val_epoch_logs)
 
-                callback_container.on_epoch_end(epoch_idx, self.history.epoch_metrics)
+                # callback_container.on_epoch_end(epoch_idx, self.history.epoch_metrics)
+                callback_container.on_epoch_end(epoch_idx, epoch_logs)
 
                 if self._stop_training:
                     break
@@ -388,7 +389,6 @@ class ModuleTrainer(object):
                                                           verbose=verbose)
                     self._in_train_loop = False
                     #self.history.batch_metrics.update(val_epoch_logs)
-                    #epoch_logs.update(val_epoch_logs)
                     epoch_logs.update(val_epoch_logs)
                     epoch_logs.update(batch_logs)
                     # TODO how to fix this?
