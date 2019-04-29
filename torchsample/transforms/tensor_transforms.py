@@ -205,33 +205,33 @@ class TypeCast(object):
             for dt in dtype:
                 if isinstance(dt, str):
                     if dt == 'byte':
-                        dt = th.ByteTensor
+                        dt = th.int8
                     elif dt == 'double':
-                        dt = th.DoubleTensor
+                        dt = th.double
                     elif dt == 'float':
-                        dt = th.FloatTensor
+                        dt = th.float
                     elif dt == 'int':
-                        dt = th.IntTensor
+                        dt = th.int
                     elif dt == 'long':
-                        dt = th.LongTensor
+                        dt = th.long
                     elif dt == 'short':
-                        dt = th.ShortTensor
+                        dt = th.short
                 dtypes.append(dt)
             self.dtype = dtypes
         else:
             if isinstance(dtype, str):
                 if dtype == 'byte':
-                    dtype = th.ByteTensor
+                    dtype = th.int8
                 elif dtype == 'double':
-                    dtype = th.DoubleTensor
+                    dtype = th.double
                 elif dtype == 'float':
-                    dtype = th.FloatTensor
+                    dtype = th.float
                 elif dtype == 'int':
-                    dtype = th.IntTensor
+                    dtype = th.int
                 elif dtype == 'long':
-                    dtype = th.LongTensor
+                    dtype = th.long
                 elif dtype == 'short':
-                    dtype = th.ShortTensor
+                    dtype = th.short
             self.dtype = dtype
 
     def __call__(self, *inputs):
@@ -242,7 +242,7 @@ class TypeCast(object):
         
         outputs = []
         for idx, _input in enumerate(inputs):
-            _input = _input.to(dtypes[idx])
+            _input = _input.to(dtype=dtypes[idx])
             outputs.append(_input)
         return outputs if len(outputs) > 1 else outputs[0]
 
