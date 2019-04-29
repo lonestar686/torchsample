@@ -11,7 +11,6 @@ from collections import OrderedDict
 
 import torch as th
 import torch.nn as nn
-from torch.autograd import Variable
 
 # local imports
 from ._utils import (_validate_loss_input, _validate_metric_input,
@@ -400,6 +399,7 @@ class ModuleTrainer(object):
                     break
         self.model.train(mode=False)
 
+    @th.no_grad()
     def predict(self,
                 inputs,
                 batch_size=32,
@@ -414,7 +414,7 @@ class ModuleTrainer(object):
 
         predict_helper = _get_helper(self, num_inputs, num_targets=0)
         pred_forward_fn = predict_helper.get_partial_forward_fn(self.model)
-        
+
         for batch_idx in range(num_batches):
             input_batch, _ = predict_helper.grab_batch(batch_idx, batch_size, inputs, None, volatile=True)
             if cuda_device >= 0:
@@ -435,6 +435,7 @@ class ModuleTrainer(object):
         self.model.train(mode=True)
         return final_pred_list if len_outputs > 1 else final_pred_list[0]
 
+    @th.no_grad()
     def predict_loader(self,
                        loader,
                        cuda_device=-1,
@@ -475,6 +476,7 @@ class ModuleTrainer(object):
         self.model.train(mode=True)
         return final_pred_list if len_outputs > 1 else final_pred_list[0]
 
+    @th.no_grad()
     def evaluate(self,
                  inputs,
                  targets=None,
@@ -516,6 +518,7 @@ class ModuleTrainer(object):
         self.model.train(mode=True)
         return eval_logs
 
+    @th.no_grad()
     def evaluate_loader(self,
                         loader,
                         cuda_device=-1,
@@ -593,10 +596,10 @@ class ModuleTrainer(object):
         self.model.apply(register_hook)
 
         if isinstance(input_size[0], (list, tuple)):
-            x = [Variable(th.rand(1,*in_size)) for in_size in input_size]
+            x = [th.rand(1,*in_size) for in_size in input_size]
             self.model(*x)
         else:
-            x = Variable(th.rand(1,*input_size))
+            x = th.rand(1,*input_size)
             self.model(x)
 
         # remove these hooks
@@ -650,12 +653,12 @@ class SingleInput_SingleTarget_Helper(object):
         targets = targets[rand_indices]
         return inputs, targets
     def grab_batch(self, batch_idx, batch_size, inputs, targets, volatile=False):
-        input_batch = Variable(inputs[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
-        target_batch = Variable(targets[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile, requires_grad=False)
+        input_batch = inputs[batch_idx*batch_size:(batch_idx+1)*batch_size]
+        target_batch = targets[batch_idx*batch_size:(batch_idx+1)*batch_size]
         return input_batch, target_batch
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch, target_batch = next(loader_iter)
-        return Variable(input_batch, volatile=volatile), Variable(target_batch, volatile=volatile, requires_grad=False)
+        return input_batch, target_batch
     def apply_transforms(self, tforms, input_batch, target_batch):
         input_batch = tforms[0](input_batch)
         target_batch = tforms[1](target_batch)
@@ -685,13 +688,13 @@ class SingleInput_MultiTarget_Helper(object):
         targets = [target_[rand_indices] for target_ in targets]
         return inputs, targets
     def grab_batch(self, batch_idx, batch_size, inputs, targets, volatile=False):
-        input_batch = Variable(inputs[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
-        target_batch = [Variable(target_[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile, requires_grad=False)
+        input_batch = inputs[batch_idx*batch_size:(batch_idx+1)*batch_size]
+        target_batch = [target_[batch_idx*batch_size:(batch_idx+1)*batch_size]
                         for target_ in targets]
         return input_batch, target_batch
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch, target_batch = next(loader_iter)
-        return Variable(input_batch, volatile=volatile), [Variable(target_, volatile=volatile, requires_grad=False) for target_ in target_batch]
+        return input_batch, target_batch
     def apply_transforms(self, tforms, input_batch, target_batch):
         input_batch = tforms[0](input_batch)
         target_batch = [tforms[1](target_) for target_ in target_batch]
@@ -717,13 +720,13 @@ class MultiInput_SingleTarget_Helper(object):
         targets = targets[rand_indices]
         return inputs, targets
     def grab_batch(self, batch_idx, batch_size, inputs, targets, volatile=False):
-        input_batch = [Variable(input_[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
+        input_batch = [input_[batch_idx*batch_size:(batch_idx+1)*batch_size]
                        for input_ in inputs]
-        target_batch = Variable(targets[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile, requires_grad=False)
+        target_batch = targets[batch_idx*batch_size:(batch_idx+1)*batch_size]
         return input_batch, target_batch
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch, target_batch = next(loader_iter)
-        return [Variable(input_, volatile=volatile) for input_ in input_batch], Variable(target_batch, volatile=volatile, requires_grad=False)
+        return input_batch, target_batch
     def apply_transforms(self, tforms, input_batch, target_batch):
         input_batch = [tforms[0](input_) for input_ in input_batch]
         target_batch = tforms[1](target_batch)
@@ -748,14 +751,14 @@ class MultiInput_MultiTarget_Helper(object):
         targets = [input_[rand_indices] for input_ in inputs]
         return inputs, targets
     def grab_batch(self, batch_idx, batch_size, inputs, targets, volatile=False):
-        input_batch = [Variable(input_[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
+        input_batch = [input_[batch_idx*batch_size:(batch_idx+1)*batch_size]
                        for input_ in inputs]
-        target_batch = [Variable(target_[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile, requires_grad=False)
+        target_batch = [target_[batch_idx*batch_size:(batch_idx+1)*batch_size]
                        for target_ in targets]
         return input_batch, target_batch
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch, target_batch = next(loader_iter)
-        return [Variable(input_, volatile=volatile) for input_ in input_batch], [Variable(target_, volatile=volatile, requires_grad=False) for target_ in target_batch]
+        return [input_ for input_ in input_batch], [target_ for target_ in target_batch]
     def apply_transforms(self, tforms, input_batch, target_batch):
         input_batch = [tforms[0](input_) for input_ in input_batch]
         target_batch = [tforms[1](target_) for target_ in target_batch]
@@ -779,11 +782,11 @@ class SingleInput_NoTarget_Helper(object):
         inputs = inputs[rand_indices]
         return inputs, None
     def grab_batch(self, batch_idx, batch_size, inputs, targets=None, volatile=False):
-        input_batch = Variable(inputs[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
+        input_batch = inputs[batch_idx*batch_size:(batch_idx+1)*batch_size]
         return input_batch, None
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch = next(loader_iter)
-        return Variable(input_batch, volatile=volatile), None
+        return input_batch, None
     def apply_transforms(self, tforms, input_batch, target_batch=None):
         input_batch = tforms[0](input_batch)
         return input_batch, None
@@ -805,12 +808,12 @@ class MultiInput_NoTarget_Helper(object):
         inputs = [input_[rand_indices] for input_ in inputs]
         return inputs, None
     def grab_batch(self, batch_idx, batch_size, inputs, targets=None, volatile=False):
-        input_batch = [Variable(input_[batch_idx*batch_size:(batch_idx+1)*batch_size], volatile=volatile)
+        input_batch = [input_[batch_idx*batch_size:(batch_idx+1)*batch_size]
                        for input_ in inputs]
         return input_batch, None
     def grab_batch_from_loader(self, loader_iter, volatile=False):
         input_batch = next(loader_iter)
-        return [Variable(input_, volatile=volatile) for input_ in input_batch], None
+        return [input_ for input_ in input_batch], None
     def apply_transforms(self, tforms, input_batch, target_batch=None):
         input_batch = [tforms[0](input_) for input_ in input_batch]
         return input_batch, None
