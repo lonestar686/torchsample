@@ -6,7 +6,7 @@ support. Get it from the releases, or pull the master branch.</b>
 This package provides a few things:
 - A high-level module for Keras-like training with callbacks, constraints, and regularizers.
 - Comprehensive data augmentation, transforms, sampling, and loading
-- Utility tensor and variable functions so you don't need numpy as often
+- Utility tensor functions so you don't need numpy as often
 
 <b>Have any feature requests?</b> Submit an issue! I'll make it happen. Specifically,
 any data augmentation, data loading, or sampling functions.
@@ -133,8 +133,6 @@ Finally, torchsample provides a few utility functions not commonly found:
 - `th_pearsonr` (mimics scipy.stats.pearsonr)
 - `th_corrcoef` (mimics np.corrcoef)
 - `th_affine2d` and `th_affine3d` (affine transforms on torch.Tensors)
-
-### Variable Functions
 - `F_affine2d` and `F_affine3d`
 - `F_map_coordinates2d` and `F_map_coordinates3d`
 

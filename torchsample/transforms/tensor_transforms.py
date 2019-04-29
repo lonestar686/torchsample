@@ -5,7 +5,6 @@ import math
 import numpy as np
 
 import torch as th
-from torch.autograd import Variable
 
 from ..utils import th_random_choice
 
@@ -62,26 +61,13 @@ class ToTensor(object):
             outputs.append(_input)
         return outputs if len(outputs) > 1 else outputs[0]
 
-
-class ToVariable(object):
-    """
-    Converts a torch.Tensor to autograd.Variable
-    """
-    def __call__(self, *inputs):
-        outputs = []
-        for idx, _input in enumerate(inputs):
-            _input = Variable(_input)
-            outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
-
-
 class ToCuda(object):
     """
-    Moves an autograd.Variable to the GPU
+    Moves a tensor to the GPU
     """
     def __init__(self, device=0):
         """
-        Moves an autograd.Variable to the GPU
+        Moves a tensor to the GPU
 
         Arguments
         ---------

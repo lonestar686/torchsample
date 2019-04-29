@@ -1,14 +1,13 @@
 
 import torch
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 from ..utils import th_iterproduct, th_flatten
 
 
 def F_affine2d(x, matrix, center=True):
     """
-    2D Affine image transform on torch.autograd.Variable
+    2D Affine image transform on tensor
     """
     if matrix.dim() == 2:
         matrix = matrix.view(-1,2,3)
@@ -20,8 +19,8 @@ def F_affine2d(x, matrix, center=True):
 
     # make a meshgrid of normal coordinates
     _coords = th_iterproduct(x.size(1),x.size(2))
-    coords = Variable(_coords.unsqueeze(0).repeat(x.size(0),1,1).float(),
-                    requires_grad=False)
+    coords = _coords.unsqueeze(0).repeat(x.size(0),1,1).float()
+
     if center:
         # shift the coordinates so center is the origin
         coords[:,:,0] = coords[:,:,0] - (x.size(1) / 2. + 0.5)
@@ -43,7 +42,7 @@ def F_affine2d(x, matrix, center=True):
 
 def F_bilinear_interp2d(input, coords):
     """
-    bilinear interpolation of 2d torch.autograd.Variable
+    bilinear interpolation of 2d tensor
     """
     x = torch.clamp(coords[:,:,0], 0, input.size(1)-2)
     x0 = x.floor()
@@ -89,12 +88,12 @@ def F_batch_affine2d(x, matrix, center=True):
 
     Example
     -------
-    >>> x = Variable(torch.zeros(3,1,10,10))
+    >>> x = torch.zeros(3,1,10,10)
     >>> x[:,:,3:7,3:7] = 1
     >>> m1 = torch.FloatTensor([[1.2,0,0],[0,1.2,0]])
     >>> m2 = torch.FloatTensor([[0.8,0,0],[0,0.8,0]])
     >>> m3 = torch.FloatTensor([[1.0,0,3],[0,1.0,3]])
-    >>> matrix = Variable(torch.stack([m1,m2,m3]))
+    >>> matrix = torch.stack([m1,m2,m3]
     >>> xx = F_batch_affine2d(x,matrix)
     """
     if matrix.dim() == 2:
@@ -105,8 +104,7 @@ def F_batch_affine2d(x, matrix, center=True):
 
     # make a meshgrid of normal coordinates
     _coords = th_iterproduct(x.size(2),x.size(3))
-    coords = Variable(_coords.unsqueeze(0).repeat(x.size(0),1,1).float(),
-                requires_grad=False)
+    coords = _coords.unsqueeze(0).repeat(x.size(0),1,1).float()
 
     if center:
         # shift the coordinates so center is the origin
@@ -172,8 +170,7 @@ def F_affine3d(x, matrix, center=True):
     b = matrix[:3,3]
 
     # make a meshgrid of normal coordinates
-    coords = Variable(th_iterproduct(x.size(1),x.size(2),x.size(3)).float(),
-                requires_grad=False)
+    coords = th_iterproduct(x.size(1),x.size(2),x.size(3)).float()
 
     if center:
         # shift the coordinates so center is the origin
@@ -263,12 +260,12 @@ def F_batch_affine3d(x, matrix, center=True):
 
     Example
     -------
-    >>> x = Variable(torch.zeros(3,1,10,10,10))
+    >>> x = torch.zeros(3,1,10,10,10)
     >>> x[:,:,3:7,3:7,3:7] = 1
     >>> m1 = torch.FloatTensor([[1.2,0,0,0],[0,1.2,0,0],[0,0,1.2,0]])
     >>> m2 = torch.FloatTensor([[0.8,0,0,0],[0,0.8,0,0],[0,0,0.8,0]])
     >>> m3 = torch.FloatTensor([[1.0,0,0,3],[0,1.0,0,3],[0,0,1.0,3]])
-    >>> matrix = Variable(torch.stack([m1,m2,m3]))
+    >>> matrix = torch.stack([m1,m2,m3])
     >>> xx = F_batch_affine3d(x,matrix)
     """
     if matrix.dim() == 2:
@@ -279,8 +276,7 @@ def F_batch_affine3d(x, matrix, center=True):
 
     # make a meshgrid of normal coordinates
     _coords = th_iterproduct(x.size(2),x.size(3),x.size(4))
-    coords = Variable(_coords.unsqueeze(0).repeat(x.size(0),1,1).float(),
-                requires_grad=False)
+    coords = _coords.unsqueeze(0).repeat(x.size(0),1,1).float()
     
     if center:
         # shift the coordinates so center is the origin
