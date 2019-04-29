@@ -81,7 +81,7 @@ class ToCuda(object):
         for idx, _input in enumerate(inputs):
             _input = _input.cuda(self.device)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 
 class ToFile(object):
@@ -146,7 +146,7 @@ class ChannelsLast(object):
         for idx, _input in enumerate(inputs):
             _input = _input.permute(*plist)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 HWC = ChannelsLast
 DHWC = ChannelsLast
@@ -181,7 +181,7 @@ class ChannelsFirst(object):
         for idx, _input in enumerate(inputs):
             _input = _input.permute(*plist)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 CHW = ChannelsFirst
 CDHW = ChannelsFirst
@@ -242,7 +242,7 @@ class TypeCast(object):
         
         outputs = []
         for idx, _input in enumerate(inputs):
-            _input = _input.type(dtypes[idx])
+            _input = _input.to(dtypes[idx])
             outputs.append(_input)
         return outputs if len(outputs) > 1 else outputs[0]
 
@@ -270,7 +270,7 @@ class AddChannel(object):
         for idx, _input in enumerate(inputs):
             _input = _input.unsqueeze(self.axis)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 ExpandAxis = AddChannel
 Unsqueeze = AddChannel
@@ -296,7 +296,7 @@ class Transpose(object):
         for idx, _input in enumerate(inputs):
             _input = th.transpose(_input, self.dim1, self.dim2)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 
 class RangeNormalize(object):
@@ -363,7 +363,7 @@ class RangeNormalize(object):
             b = self.max_val- a * _max_val
             _input = _input.mul(a).add(b)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 
 class StdNormalize(object):
@@ -375,7 +375,7 @@ class StdNormalize(object):
         for idx, _input in enumerate(inputs):
             _input = _input.sub(_input.mean()).div(_input.std())
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 
 class Slice2D(object):
@@ -445,7 +445,7 @@ class RandomCrop(object):
         for idx, _input in enumerate(inputs):
             _input = _input[:, h_idx:(h_idx+self.size[0]),w_idx:(w_idx+self.size[1])]
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
 
 class SpecialCrop(object):
@@ -599,5 +599,5 @@ class RandomOrder(object):
         for idx, _input in enumerate(inputs):
             _input = _input.index_select(0, order)
             outputs.append(_input)
-        return outputs if len(outputs) > 0 else outputs[0]
+        return outputs if len(outputs) > 1 else outputs[0]
 
